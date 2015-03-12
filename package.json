@@ -8,13 +8,15 @@
     "url": "http://"
   },
   "dependencies": {
-
+    "dat-gui": "^0.5.0",
+    "raf": "^2.0.4"
   },
   "devDependencies": {
     "browser-sync": "^2.2.3",
     "browserify": "^9.0.3",
     "browserify-shim": "^3.8.3",
     "del": "^1.1.1",
+    "glslify": "^2.0.0",
     "gulp": "^3.8.11",
     "gulp-autoprefixer": "^2.1.0",
     "gulp-base64": "^0.1.2",
@@ -34,11 +36,12 @@
   "browser": {},
   "browserify": {
     "transform": [
-      "browserify-shim"
+      "browserify-shim",
+      "glslify"
     ]
   },
   "browserify-shim": {
-  	"three": "global:THREE",
+    "three": "global:THREE",
     "tweenmax": "global:TweenMax",
     "preloadjs": "global:createjs"
   }
