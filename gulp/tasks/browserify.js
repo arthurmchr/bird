@@ -8,6 +8,7 @@ var	browserify = require('browserify');
 var	reload = require('browser-sync').reload;
 var	sourcemaps = require('gulp-sourcemaps');
 var	source = require('vinyl-source-stream');
+var errorHandler = require('../error-handler');
 
 var packageJSON = require('../../package.json');
 var librairies = Object.keys(packageJSON.dependencies);
@@ -28,6 +29,7 @@ gulp.task('browserify', function() {
 		browserifyConfig
 			.external(librairies)
 			.bundle()
+			.on('error', errorHandler)
 			.pipe(source('bundle.js'))
 			.pipe(buffer())
 			.pipe(sourcemaps.init({

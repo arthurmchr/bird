@@ -1,5 +1,3 @@
-/* global glslify */
-
 var THREE = require('three');
 var dat = require('dat-gui');
 
@@ -22,12 +20,10 @@ function WebGL(width, height) {
 		this.tube = 80;
 		this.radialSegments = 160;
 		this.tubularSegments = 10;
-		this.p = 2;
-		this.q = 3;
 		this.redrawTorus = function() {
 			this.scene.remove(torusKnot);
 
-			torusKnotGeo = new THREE.TorusKnotGeometry(guiParams.radius, guiParams.tube, guiParams.radialSegments, guiParams.tubularSegments, guiParams.p, guiParams.q);
+			torusKnotGeo = new THREE.TorusKnotGeometry(guiParams.radius, guiParams.tube, guiParams.radialSegments, guiParams.tubularSegments);
 			torusKnot = new THREE.Mesh(torusKnotGeo, torusKnotShader);
 			this.scene.add(torusKnot);
 		};
@@ -41,8 +37,6 @@ function WebGL(width, height) {
 	gui.add(guiParams, 'tube', 1).onChange(guiParams.redrawTorus);
 	gui.add(guiParams, 'radialSegments', 3).onChange(guiParams.redrawTorus);
 	gui.add(guiParams, 'tubularSegments', 2).onChange(guiParams.redrawTorus);
-	gui.add(guiParams, 'p', 0).onChange(guiParams.redrawTorus);
-	gui.add(guiParams, 'q', 0).onChange(guiParams.redrawTorus);
 
 	gui.close();
 
@@ -54,31 +48,131 @@ function WebGL(width, height) {
 
 	// Objects
 
-	var torusKnotGeo = new THREE.TorusKnotGeometry(guiParams.radius, guiParams.tube, guiParams.radialSegments, guiParams.tubularSegments, guiParams.p, guiParams.q);
-	//var torusKnotMat = new THREE.MeshPhongMaterial({
-	//	map: mapTexture
-		//specularMap: THREE.ImageUtils.loadTexture('obj/leeperrysmith/Map-SPEC.jpg'),
-		//normalMap: THREE.ImageUtils.loadTexture( "obj/leeperrysmith/Infinite-Level_02_Tangent_SmoothUV.jpg" ),
-	//});
+	var torusKnotGeo = new THREE.TorusKnotGeometry(guiParams.radius, guiParams.tube, guiParams.radialSegments, guiParams.tubularSegments);
 
-	var torusGLSL = glslify({
-		vertex: '../glsl/torus-vertex.glsl',
-		fragment: '../glsl/torus-fragment.glsl',
-		sourceOnly: true
-	});
+	/* jshint camelcase:false */
+	/* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+
 	var torusKnotShader = new THREE.ShaderMaterial({
-		uniforms: {
-			time: {
-				type: 'f',
-				value: 1.0
+		uniforms: THREE.UniformsUtils.merge([
+
+			THREE.UniformsLib.common,
+			THREE.UniformsLib.bump,
+			THREE.UniformsLib.normalmap,
+			THREE.UniformsLib.lights,
+			{
+				ambient: {
+					type: 'c',
+					value: new THREE.Color(0xffffff)
+				},
+				emissive: {
+					type: 'c',
+					value: new THREE.Color(0x000000)
+				},
+				specular: {
+					type: 'c',
+					value: new THREE.Color(0x111111)
+				},
+				shininess: {
+					type: 'f',
+					value: 30
+				},
+				map: {
+					type: 't',
+					value: mapTexture
+				}
 			}
-		},
-		vertexShader: torusGLSL.vertex,
-		fragmentShader: torusGLSL.fragment
+		]),
+
+		vertexShader: [
+
+			'#define PHONG',
+
+			'varying vec3 vViewPosition;',
+			'varying vec3 vNormal;',
+
+			THREE.ShaderChunk.map_pars_vertex,
+			THREE.ShaderChunk.lightmap_pars_vertex,
+			THREE.ShaderChunk.envmap_pars_vertex,
+			THREE.ShaderChunk.lights_phong_pars_vertex,
+			THREE.ShaderChunk.color_pars_vertex,
+
+			'void main() {',
+
+				THREE.ShaderChunk.map_vertex,
+				THREE.ShaderChunk.lightmap_vertex,
+				THREE.ShaderChunk.color_vertex,
+
+				THREE.ShaderChunk.defaultnormal_vertex,
+
+				'vNormal = normalize(transformedNormal);',
+
+				THREE.ShaderChunk.default_vertex,
+
+				'vViewPosition = -mvPosition.xyz;',
+
+				THREE.ShaderChunk.envmap_vertex,
+				THREE.ShaderChunk.lights_phong_vertex,
+
+			'}'
+
+		].join('\n'),
+
+		fragmentShader: [
+
+			'#define PHONG',
+
+			'uniform vec3 diffuse;',
+			'uniform float opacity;',
+
+			'uniform vec3 ambient;',
+			'uniform vec3 emissive;',
+			'uniform vec3 specular;',
+			'uniform float shininess;',
+
+			THREE.ShaderChunk.color_pars_fragment,
+			THREE.ShaderChunk.map_pars_fragment,
+			THREE.ShaderChunk.lightmap_pars_fragment,
+			THREE.ShaderChunk.envmap_pars_fragment,
+			THREE.ShaderChunk.lights_phong_pars_fragment,
+			THREE.ShaderChunk.bumpmap_pars_fragment,
+			THREE.ShaderChunk.normalmap_pars_fragment,
+			THREE.ShaderChunk.specularmap_pars_fragment,
+			THREE.ShaderChunk.logdepthbuf_pars_fragment,
+
+			'void main() {',
+
+				'gl_FragColor = vec4(vec3(1.0), opacity);',
+
+				THREE.ShaderChunk.logdepthbuf_fragment,
+				THREE.ShaderChunk.map_fragment,
+				THREE.ShaderChunk.specularmap_fragment,
+
+				THREE.ShaderChunk.lights_phong_fragment,
+
+				THREE.ShaderChunk.lightmap_fragment,
+				THREE.ShaderChunk.color_fragment,
+				THREE.ShaderChunk.envmap_fragment,
+
+				THREE.ShaderChunk.linear_to_gamma_fragment,
+
+			'}'
+
+		].join('\n'),
+
+		lights: true//,
+		//map: true
 	});
+
+	/* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+	/* jshint camelcase:true */
 
 	var torusKnot = new THREE.Mesh(torusKnotGeo, torusKnotShader);
 	this.scene.add(torusKnot);
+
+	torusKnotShader.map = true;
+	//mapTexture.needsUpdate = true;
+	//torusKnotShader.needsUpdate = true;
 
 	// Light
 

@@ -1,3 +1,3 @@
-var Main = require('./app-manager');
+var AppManager = require('./app-manager');
 
-new Main();
+new AppManager();
