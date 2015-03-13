@@ -16,7 +16,7 @@
     "browserify": "^9.0.3",
     "browserify-shim": "^3.8.3",
     "del": "^1.1.1",
-    "glslify": "^2.0.0",
+    "glslify": "^1.6.0",
     "gulp": "^3.8.11",
     "gulp-autoprefixer": "^2.1.0",
     "gulp-base64": "^0.1.2",

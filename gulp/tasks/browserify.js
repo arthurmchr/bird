@@ -35,9 +35,10 @@ gulp.task('browserify', function() {
 			}))
 			.pipe(uglify())
 			.pipe(sourcemaps.write('./'))
-			.pipe(gulp.dest(files.browserifyDest));
-
-		reload();
+			.pipe(gulp.dest(files.browserifyDest))
+			.pipe(reload({
+				stream: true
+			}));
 	}
 
 	browserifyConfig.on('update', rebundle);
