@@ -21,11 +21,11 @@ function WebGL(width, height) {
 		this.radialSegments = 160;
 		this.tubularSegments = 10;
 		this.redrawTorus = function() {
-			this.scene.remove(torusKnot);
+			this.scene.remove(this.torusKnot);
 
 			torusKnotGeo = new THREE.TorusKnotGeometry(guiParams.radius, guiParams.tube, guiParams.radialSegments, guiParams.tubularSegments);
-			torusKnot = new THREE.Mesh(torusKnotGeo, torusKnotShader);
-			this.scene.add(torusKnot);
+			this.torusKnot = new THREE.Mesh(torusKnotGeo, torusKnotShader);
+			this.scene.add(this.torusKnot);
 		};
 	};
 
@@ -44,7 +44,6 @@ function WebGL(width, height) {
 
 	var mapTexture = THREE.ImageUtils.loadTexture('/media/img/snake-map.jpg');
 	mapTexture.wrapS = mapTexture.wrapT = THREE.RepeatWrapping;
-	mapTexture.repeat.set(30, 6);
 
 	// Objects
 
@@ -61,57 +60,35 @@ function WebGL(width, height) {
 			THREE.UniformsLib.normalmap,
 			THREE.UniformsLib.lights,
 			{
-				ambient: {
-					type: 'c',
-					value: new THREE.Color(0xffffff)
-				},
-				emissive: {
-					type: 'c',
-					value: new THREE.Color(0x000000)
-				},
-				specular: {
-					type: 'c',
-					value: new THREE.Color(0x111111)
-				},
-				shininess: {
+				time: {
 					type: 'f',
-					value: 30
+					value: 0.0
 				},
-				map: {
-					type: 't',
-					value: mapTexture
+				speed: {
+					type: 'f',
+					value: 0.2
 				}
 			}
 		]),
 
 		vertexShader: [
 
-			'#define PHONG',
-
 			'varying vec3 vViewPosition;',
 			'varying vec3 vNormal;',
 
 			THREE.ShaderChunk.map_pars_vertex,
-			THREE.ShaderChunk.lightmap_pars_vertex,
-			THREE.ShaderChunk.envmap_pars_vertex,
 			THREE.ShaderChunk.lights_phong_pars_vertex,
-			THREE.ShaderChunk.color_pars_vertex,
 
 			'void main() {',
 
 				THREE.ShaderChunk.map_vertex,
-				THREE.ShaderChunk.lightmap_vertex,
-				THREE.ShaderChunk.color_vertex,
 
-				THREE.ShaderChunk.defaultnormal_vertex,
+				'vNormal = normal;',
 
-				'vNormal = normalize(transformedNormal);',
+				// default_vertex
 
-				THREE.ShaderChunk.default_vertex,
+				'gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
 
-				'vViewPosition = -mvPosition.xyz;',
-
-				THREE.ShaderChunk.envmap_vertex,
 				THREE.ShaderChunk.lights_phong_vertex,
 
 			'}'
@@ -120,65 +97,61 @@ function WebGL(width, height) {
 
 		fragmentShader: [
 
-			'#define PHONG',
-
 			'uniform vec3 diffuse;',
-			'uniform float opacity;',
-
 			'uniform vec3 ambient;',
 			'uniform vec3 emissive;',
 			'uniform vec3 specular;',
 			'uniform float shininess;',
 
-			THREE.ShaderChunk.color_pars_fragment,
+			'uniform float time;',
+			'uniform float speed;',
+
 			THREE.ShaderChunk.map_pars_fragment,
-			THREE.ShaderChunk.lightmap_pars_fragment,
-			THREE.ShaderChunk.envmap_pars_fragment,
 			THREE.ShaderChunk.lights_phong_pars_fragment,
 			THREE.ShaderChunk.bumpmap_pars_fragment,
 			THREE.ShaderChunk.normalmap_pars_fragment,
 			THREE.ShaderChunk.specularmap_pars_fragment,
-			THREE.ShaderChunk.logdepthbuf_pars_fragment,
 
 			'void main() {',
 
-				'gl_FragColor = vec4(vec3(1.0), opacity);',
+				// map_fragment,
 
-				THREE.ShaderChunk.logdepthbuf_fragment,
-				THREE.ShaderChunk.map_fragment,
+				'vec2 uvTimeShift = vUv * vec2(30.0, 6.0) + vec2(-1.0, -0.3) * time * speed;',
+				'vec4 texelColor = texture2D(map, uvTimeShift);',
+				'gl_FragColor = texelColor;',
+
 				THREE.ShaderChunk.specularmap_fragment,
 
 				THREE.ShaderChunk.lights_phong_fragment,
-
-				THREE.ShaderChunk.lightmap_fragment,
-				THREE.ShaderChunk.color_fragment,
-				THREE.ShaderChunk.envmap_fragment,
-
-				THREE.ShaderChunk.linear_to_gamma_fragment,
 
 			'}'
 
 		].join('\n'),
 
-		lights: true//,
-		//map: true
+		lights: true
 	});
+
+	torusKnotShader.map = true;
+	torusKnotShader.uniforms.map.value = mapTexture;
+
+	//torusKnotShader.uniforms.specularMap = ;
+	//torusKnotShader.uniforms.bumpMap = ;
+	//torusKnotShader.uniforms.normalMap = ;
 
 	/* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 	/* jshint camelcase:true */
 
-	var torusKnot = new THREE.Mesh(torusKnotGeo, torusKnotShader);
-	this.scene.add(torusKnot);
-
-	torusKnotShader.map = true;
-	//mapTexture.needsUpdate = true;
-	//torusKnotShader.needsUpdate = true;
+	this.torusKnot = new THREE.Mesh(torusKnotGeo, torusKnotShader);
+	this.scene.add(this.torusKnot);
 
 	// Light
 
 	var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-	directionalLight.position.set(0, 1, 0);
+	directionalLight.position.set(-0.1, 1, 0.1);
 	this.scene.add(directionalLight);
+
+	this.clock = new THREE.Clock();
+	this.mouseScreenX = 0;
 }
 
 WebGL.prototype.resize = function(width, height) {
@@ -188,9 +161,17 @@ WebGL.prototype.resize = function(width, height) {
 	this.renderer.setSize(width, height);
 };
 
+WebGL.prototype.mouseMove = function(x) {
+	this.mouseScreenX = (x - window.innerWidth / 2) * 10;
+};
+
 WebGL.prototype.render = function() {
 	this.renderer.render(this.scene, this.camera);
 
+	this.torusKnot.material.uniforms.time.value += this.clock.getDelta();
+
+	this.camera.position.x = this.mouseScreenX * 0.025;
+	this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 };
 
 module.exports = WebGL;

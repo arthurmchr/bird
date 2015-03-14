@@ -8,6 +8,7 @@ var	browserify = require('browserify');
 var	reload = require('browser-sync').reload;
 var	sourcemaps = require('gulp-sourcemaps');
 var	source = require('vinyl-source-stream');
+var	filter = require('gulp-filter');
 var errorHandler = require('../error-handler');
 
 var packageJSON = require('../../package.json');
@@ -38,6 +39,7 @@ gulp.task('browserify', function() {
 			.pipe(uglify())
 			.pipe(sourcemaps.write('./'))
 			.pipe(gulp.dest(files.browserifyDest))
+			.pipe(filter('**/*.js'))
 			.pipe(reload({
 				stream: true
 			}));
