@@ -103,7 +103,7 @@ function Bird() {
 				'void main() {',
 
 					'vec4 col = texture2D(colorMap, vUv);',
-					'vec4 hairColor = texture2D(hairMap, vUv * 10.0);',
+					'vec4 hairColor = texture2D(hairMap, vUv * vec2(20.0, 2.0));',
 
 					// Discard no hairs + above the max length
 
