@@ -3,6 +3,7 @@ var THREE = require('three');
 function Bird() {
 
 	this.gravity = new THREE.Vector3(0, -0.75, 0);
+	this.mesh = new THREE.Object3D();
 	this.meshes = [];
 
 	var torusKnotGeo = new THREE.TorusKnotGeometry(160, 80, 160, 10);
@@ -119,8 +120,8 @@ function Bird() {
 					'vec3 light = vec3(0.1, 1.0, 0.3);',
 					'float d = pow(max(0.25, dot(vNormal.xyz, light)) * 2.75, 1.4);',
 
-					//'gl_FragColor = vec4(color * col.xyz * d * shadow, 1.1 - offset);',
-					'gl_FragColor = hairColor;',
+					'gl_FragColor = vec4(color * col.xyz * d * shadow, 1.1 - offset);',
+					//'gl_FragColor = hairColor;',
 
 				'}'
 			].join('\n'),
@@ -128,9 +129,9 @@ function Bird() {
 			transparent: true
 		});
 
-		this.mesh = new THREE.Mesh(torusKnotGeo, material);
-
-		this.meshes.push(this.mesh);
+		var newMesh = new THREE.Mesh(torusKnotGeo, material);
+		this.meshes.push(newMesh);
+		this.mesh.add(newMesh);
 	}
 }
 
@@ -179,9 +180,9 @@ Bird.prototype.render = function(delta) {
 	//shaderTime += delta*0.005;
 
 	var i;
-	var ln = this.meshes.length;
+	var ln;
 
-	for (i = 0; i < ln; i++) {
+	for (i = 0, ln = this.meshes.length; i < ln; i++) {
 		this.meshes[i].material.uniforms.time.value = delta;
 	}
 };
