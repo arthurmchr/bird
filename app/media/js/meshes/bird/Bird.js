@@ -79,7 +79,7 @@ function Bird() {
 
 					// Move outwards depending on offset(layer) and normal + force + gravity
 
-					'vec3 animated = position + (normalize(aNormal) * offset * 12.0);',
+					'vec3 animated = position + (normalize(aNormal) * offset * 40.0);',
 
 					'vNormal = normalize(normal * aNormal);',
 
