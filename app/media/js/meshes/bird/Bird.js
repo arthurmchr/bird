@@ -20,62 +20,73 @@ function Bird() {
 
 	for (i = 0, shells = 60; i < shells; i++) {
 
-		var uniforms = {
-
-			color: {
-				type: 'c',
-				value: new THREE.Color(0xffffff)
-			},
-			colorMap: {
-				type: 't',
-				value: mapTexture
-			},
-			hairMap: {
-				type: 't',
-				value: furTexure
-			},
-			offset:	{
-				type: 'f',
-				value: i / shells
-			},
-			time: {
-				type: 'f',
-				value: 0.0
-			},
-			gravity: {
-				type: 'v3',
-				value: this.gravity
-			}
-		};
-
 		var material = new THREE.ShaderMaterial({
-			uniforms: uniforms,
+			uniforms: THREE.UniformsUtils.merge([
+
+				//THREE.UniformsLib.common,
+				THREE.UniformsLib.lights,
+				{
+
+					color: {
+						type: 'c',
+						value: new THREE.Color(0xffffff)
+					},
+					colorMap: {
+						type: 't',
+						value: mapTexture
+					},
+					hairMap: {
+						type: 't',
+						value: furTexure
+					},
+					offset:	{
+						type: 'f',
+						value: i / shells
+					},
+					time: {
+						type: 'f',
+						value: 0.0
+					},
+					gravity: {
+						type: 'v3',
+						value: this.gravity
+					}
+				}
+			]),
+
+			/* jshint camelcase:false */
+			/* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+
 			vertexShader: [
 				'uniform float offset;',
-				//'uniform float time;',
-				//'uniform vec3 gravity;',
+				'uniform float time;',
+				'uniform vec3 gravity;',
 
 				'varying vec2 vUv;',
 				'varying vec3 vNormal;',
+				'varying vec3 vViewPosition;',
+
+				THREE.ShaderChunk.lights_phong_pars_vertex,
 
 				'void main() {',
 
-					//'vec3 forceDirection = vec3(0.0, 0.0, 0.0);',
+					'vec3 forceDirection = vec3(0.0, 0.0, 0.0);',
 
 					// Wind
 
-					//'forceDirection.x = sin(time + position.x * 0.05) * 0.2;',
-					//'forceDirection.y = cos(time * 0.7 + position.y * 0.04) * 0.2;',
-					//'forceDirection.z = sin(time * 0.7 + position.y * 0.04) * 0.2;',
+					// 'forceDirection.x = sin(time + position.x * 0.05);',
+					// 'forceDirection.y = cos(time * 0.7 + position.y * 0.04);',
+					// 'forceDirection.z = sin(time * 0.7 + position.y * 0.04);',
 
 					// Gravity
 
-					//'vec3 displacement = gravity + forceDirection;',
+					'vec3 displacement = gravity + forceDirection;',
 
-					//'float displacementFactor = pow(offset, 3.0);',
+					'float displacementFactor = pow(offset, 3.0);',
 
 					'vec3 aNormal = normal;',
-					//'aNormal.xyz += displacement * displacementFactor;',
+					'aNormal.xyz += displacement * displacementFactor;',
+					'aNormal.xyz += displacement * displacementFactor;',
 
 					// Move outwards depending on offset(layer) and normal + force + gravity
 
@@ -89,16 +100,25 @@ function Bird() {
 
 					'gl_Position = projectionMatrix * mvPosition;',
 
+					THREE.ShaderChunk.lights_phong_vertex,
+
 				'}'
 			].join('\n'),
 			fragmentShader: [
+				'uniform vec3 diffuse;',
+				'uniform vec3 ambient;',
+				'uniform vec3 emissive;',
+				'uniform vec3 specular;',
+				'uniform float shininess;',
+
 				'uniform sampler2D colorMap;',
 				'uniform sampler2D hairMap;',
 				'uniform vec3 color;',
 				'uniform float offset;',
 
-				'varying vec3 vNormal;',
 				'varying vec2 vUv;',
+
+				THREE.ShaderChunk.lights_phong_pars_fragment,
 
 				'void main() {',
 
@@ -115,18 +135,18 @@ function Bird() {
 
 					'float shadow = mix(0.0, hairColor.b * 1.2, offset);',
 
-					// Light
+					'gl_FragColor = vec4(col.xyz * shadow, 1.1 - offset);',
 
-					'vec3 light = vec3(0.1, 1.0, 0.3);',
-					'float d = pow(max(0.25, dot(vNormal.xyz, light)) * 2.75, 1.4);',
-
-					'gl_FragColor = vec4(color * col.xyz * d * shadow, 1.1 - offset);',
-					//'gl_FragColor = hairColor;',
+					THREE.ShaderChunk.lights_phong_fragment,
 
 				'}'
 			].join('\n'),
 
-			transparent: true
+			/* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+			/* jshint camelcase:true */
+
+			transparent: true,
+			lights: true
 		});
 
 		var newMesh = new THREE.Mesh(torusKnotGeo, material);
@@ -141,7 +161,7 @@ Bird.prototype.generateTexture = function() {
 
 	var ctx = canvas.getContext('2d');
 
-	for (var i = 0; i < 20000; i++) {
+	for (var i = 0; i < 10000; i++) {
 		ctx.fillStyle = 'rgb(255, ' + Math.floor(Math.random() * 255) + ', ' + Math.floor(Math.random() * 255) + ')';
 
 		ctx.fillRect((Math.random() * canvas.width), (Math.random() * canvas.height), 2, 2);

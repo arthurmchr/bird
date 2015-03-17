@@ -8,8 +8,7 @@ module.exports = {
 	copyEntry: [
 		'app/*',
 		'app/media/img/**',
-		'app/media/fonts/**',
-		'app/media/glsl/**'
+		'app/media/fonts/**'
 	],
 	copyDest: 'dist',
 	copyBase: 'app',
