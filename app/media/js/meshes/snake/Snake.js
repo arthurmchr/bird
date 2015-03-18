@@ -31,21 +31,20 @@ function Snake() {
 
 		vertexShader: [
 
-			'varying vec3 vViewPosition;',
+			'varying vec2 vUv;',
 			'varying vec3 vNormal;',
+			'varying vec3 vViewPosition;',
 
-			THREE.ShaderChunk.map_pars_vertex,
 			THREE.ShaderChunk.lights_phong_pars_vertex,
 
 			'void main() {',
 
-				THREE.ShaderChunk.map_vertex,
-
+				'vUv = uv;',
 				'vNormal = normal;',
 
-				'gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
-
 				THREE.ShaderChunk.lights_phong_vertex,
+
+				'gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
 
 			'}'
 
@@ -63,10 +62,10 @@ function Snake() {
 			'uniform float speed;',
 
 			THREE.ShaderChunk.map_pars_fragment,
-			THREE.ShaderChunk.lights_phong_pars_fragment,
 			THREE.ShaderChunk.bumpmap_pars_fragment,
 			THREE.ShaderChunk.normalmap_pars_fragment,
 			THREE.ShaderChunk.specularmap_pars_fragment,
+			THREE.ShaderChunk.lights_phong_pars_fragment,
 
 			'void main() {',
 

@@ -18,26 +18,21 @@ function Bird() {
 	var i;
 	var shells;
 
-	for (i = 0, shells = 60; i < shells; i++) {
+	for (i = 0, shells = 30; i < shells; i++) {
 
 		var material = new THREE.ShaderMaterial({
 			uniforms: THREE.UniformsUtils.merge([
 
-				//THREE.UniformsLib.common,
+				THREE.UniformsLib.common,
 				THREE.UniformsLib.lights,
 				{
-
-					color: {
-						type: 'c',
-						value: new THREE.Color(0xffffff)
-					},
 					colorMap: {
 						type: 't',
-						value: mapTexture
+						value: null
 					},
 					hairMap: {
 						type: 't',
-						value: furTexure
+						value: null
 					},
 					offset:	{
 						type: 'f',
@@ -46,6 +41,10 @@ function Bird() {
 					time: {
 						type: 'f',
 						value: 0.0
+					},
+					speed: {
+						type: 'f',
+						value: 0.2
 					},
 					gravity: {
 						type: 'v3',
@@ -70,13 +69,15 @@ function Bird() {
 
 				'void main() {',
 
-					'vec3 forceDirection = vec3(0.0, 0.0, 0.0);',
+					'vUv = uv;',
+					'vec3 aNormal = normal;',
+					'vec3 forceDirection = vec3(0.0);',
 
 					// Wind
 
-					// 'forceDirection.x = sin(time + position.x * 0.05);',
-					// 'forceDirection.y = cos(time * 0.7 + position.y * 0.04);',
-					// 'forceDirection.z = sin(time * 0.7 + position.y * 0.04);',
+					//'forceDirection.x = sin(time * 0.4 + position.x * 0.5);',
+					//'forceDirection.y = cos(time * 0.7 + position.y * 0.4);',
+					//'forceDirection.z = sin(time * 0.7 + position.y * 20.0);',
 
 					// Gravity
 
@@ -84,21 +85,15 @@ function Bird() {
 
 					'float displacementFactor = pow(offset, 3.0);',
 
-					'vec3 aNormal = normal;',
-					'aNormal.xyz += displacement * displacementFactor;',
 					'aNormal.xyz += displacement * displacementFactor;',
 
 					// Move outwards depending on offset(layer) and normal + force + gravity
 
-					'vec3 animated = position + (normalize(aNormal) * offset * 40.0);',
+					'vec3 animated = position + (normalize(aNormal) * offset * 60.0);',
 
 					'vNormal = normalize(normal * aNormal);',
 
-					'vUv = uv;',
-
-					'vec4 mvPosition = modelViewMatrix * vec4(animated, 1.0);',
-
-					'gl_Position = projectionMatrix * mvPosition;',
+					'gl_Position = projectionMatrix * modelViewMatrix * vec4(animated, 1.0);',
 
 					THREE.ShaderChunk.lights_phong_vertex,
 
@@ -113,14 +108,19 @@ function Bird() {
 
 				'uniform sampler2D colorMap;',
 				'uniform sampler2D hairMap;',
-				'uniform vec3 color;',
 				'uniform float offset;',
+				'uniform float time;',
+				'uniform float speed;',
 
 				'varying vec2 vUv;',
 
+				THREE.ShaderChunk.specularmap_pars_fragment,
 				THREE.ShaderChunk.lights_phong_pars_fragment,
 
 				'void main() {',
+
+					//'vec2 uvTimeShift = vUv + vec2(-1.0, -0.3) * time * speed;',
+					//'vec2 uvTimeShiftRepeat = vUv * vec2(20.0, 2.0) + vec2(-1.0, -0.3) * time * speed;',
 
 					'vec4 col = texture2D(colorMap, vUv);',
 					'vec4 hairColor = texture2D(hairMap, vUv * vec2(20.0, 2.0));',
@@ -131,13 +131,65 @@ function Bird() {
 						'discard;',
 					'}',
 
-					// Darker towards bottom of the hair
+					'gl_FragColor = vec4(col.xyz, 1.1 - offset);',
 
-					'float shadow = mix(0.0, hairColor.b * 1.2, offset);',
+					THREE.ShaderChunk.specularmap_fragment,
 
-					'gl_FragColor = vec4(col.xyz * shadow, 1.1 - offset);',
+					//THREE.ShaderChunk.lights_phong_fragment,
 
-					THREE.ShaderChunk.lights_phong_fragment,
+					'vec3 normal = normalize( vNormal );',
+					'vec3 viewPosition = normalize( vViewPosition );',
+					'#if MAX_DIR_LIGHTS > 0',
+
+						'vec3 dirDiffuse = vec3( 0.0 );',
+						'vec3 dirSpecular = vec3( 0.0 );',
+
+						'for( int i = 0; i < MAX_DIR_LIGHTS; i ++ ) {',
+
+							'vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ i ], 0.0 );',
+							'vec3 dirVector = normalize( lDirection.xyz );',
+
+							'float dotProduct = dot( normal, dirVector );',
+
+							'#ifdef WRAP_AROUND',
+
+								'float dirDiffuseWeightFull = max( dotProduct, 0.0 );',
+								'float dirDiffuseWeightHalf = max( 0.5 * dotProduct + 0.5, 0.0 );',
+
+								'vec3 dirDiffuseWeight = mix( vec3( dirDiffuseWeightFull ), vec3( dirDiffuseWeightHalf ), wrapRGB );',
+
+							'#else',
+
+								'float dirDiffuseWeight = max( dotProduct, 0.0 );',
+
+							'#endif',
+
+							'dirDiffuse += diffuse * directionalLightColor[ i ] * dirDiffuseWeight;',
+
+							'vec3 dirHalfVector = normalize( dirVector + viewPosition );',
+							'float dirDotNormalHalf = max( dot( normal, dirHalfVector ), 0.0 );',
+							'float dirSpecularWeight = specularStrength * max( pow( dirDotNormalHalf, shininess ), 0.0 );',
+
+							'float specularNormalization = ( shininess + 2.0 ) / 8.0;',
+
+							'vec3 schlick = specular + vec3( 1.0 - specular ) * pow( max( 1.0 - dot( dirVector, dirHalfVector ), 0.0 ), 5.0 );',
+							'dirSpecular += schlick * directionalLightColor[ i ] * dirSpecularWeight * dirDiffuseWeight * specularNormalization;',
+
+						'}',
+
+					'#endif',
+
+					'vec3 totalDiffuse = vec3( 0.0 );',
+					'vec3 totalSpecular = vec3( 0.0 );',
+
+					'#if MAX_DIR_LIGHTS > 0',
+
+						'totalDiffuse += dirDiffuse;',
+						'totalSpecular += dirSpecular;',
+
+					'#endif',
+
+					'gl_FragColor.xyz = gl_FragColor.xyz * ( emissive + totalDiffuse + ambientLightColor * ambient ) + totalSpecular;',
 
 				'}'
 			].join('\n'),
@@ -148,6 +200,9 @@ function Bird() {
 			transparent: true,
 			lights: true
 		});
+
+		material.uniforms.colorMap.value = mapTexture;
+		material.uniforms.hairMap.value = furTexure;
 
 		var newMesh = new THREE.Mesh(torusKnotGeo, material);
 		this.meshes.push(newMesh);

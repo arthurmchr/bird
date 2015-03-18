@@ -45,7 +45,8 @@ function WebGL(width, height) {
 	// Lights
 
 	var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-	directionalLight.position.set(-0.1, 1, 0.1);
+	//directionalLight.position.set(-0.1, 1, 0.1);
+	directionalLight.position.set(-0.1, 1, 1);
 	this.scene.add(directionalLight);
 
 	this.mouseScreenX = 0;
