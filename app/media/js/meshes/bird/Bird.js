@@ -71,17 +71,10 @@ function Bird() {
 
 					'vUv = uv;',
 					'vec3 aNormal = normal;',
-					'vec3 forceDirection = vec3(0.0);',
-
-					// Wind
-
-					//'forceDirection.x = sin(time * 0.4 + position.x * 0.5);',
-					//'forceDirection.y = cos(time * 0.7 + position.y * 0.4);',
-					//'forceDirection.z = sin(time * 0.7 + position.y * 20.0);',
 
 					// Gravity
 
-					'vec3 displacement = gravity + forceDirection;',
+					'vec3 displacement = gravity;',
 
 					'float displacementFactor = pow(offset, 3.0);',
 
@@ -119,7 +112,7 @@ function Bird() {
 
 				'void main() {',
 
-					//'vec2 uvTimeShift = vUv + vec2(-1.0, -0.3) * time * speed;',
+					'vec2 uvTimeShift = vUv + vec2(-1.0, -0.3) * time * speed;',
 					//'vec2 uvTimeShiftRepeat = vUv * vec2(20.0, 2.0) + vec2(-1.0, -0.3) * time * speed;',
 
 					'vec4 col = texture2D(colorMap, vUv);',
@@ -226,33 +219,6 @@ Bird.prototype.generateTexture = function() {
 };
 
 Bird.prototype.render = function(delta) {
-	//var optimalDivider = delta / 16;
-	//var smoothing = Math.max(4, (20 / optimalDivider));
-
-	// fake some gravity according to mouse movement
-
-	//var xf = (mouse.x - mouseObj.x)/(smoothing*5);
-	//var yf = (mouse.y - mouseObj.y)/(smoothing*5);
-
-	// mouseObj.vx += xf
-	// mouseObj.vy += yf;
-	// mouseObj.vx *= 0.96;
-	// mouseObj.vy *= 0.94;
-	// mouseObj.x += mouseObj.vx;
-	// mouseObj.y += mouseObj.vy;
-
-	//gravity.x = -(mouse.x-mouseObj.x)*2;
-
-	//var dif = Math.sin(mouse.x)*150 - camera.position.x;
-	//gravity.y = -0.75 + (Math.abs(dif)/150) - (mouse.y-mouseObj.y)*2;
-
-	// camera.position.x += (Math.sin(mouse.x)*150 - camera.position.x)/smoothing;
-	// camera.position.z += (Math.cos(mouse.x)*150 - camera.position.z)/smoothing;
-	// camera.position.y += (Math.sin(mouse.y)*150 - camera.position.y)/smoothing;
-
-	//camera.lookAt(scene.position);
-
-	//shaderTime += delta*0.005;
 
 	var i;
 	var ln;

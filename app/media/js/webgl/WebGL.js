@@ -42,24 +42,30 @@ function WebGL(width, height) {
 
 	// gui.close();
 
-	// Lights
+	/*********************************************/
+
+	/* Lights ************************************/
 
 	var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-	//directionalLight.position.set(-0.1, 1, 0.1);
-	directionalLight.position.set(-0.1, 1, 1);
+	directionalLight.position.set(-0.1, 1, 0.1);
+	//directionalLight.position.set(-0.1, 1, 1);
 	this.scene.add(directionalLight);
 
 	this.mouseScreenX = 0;
 
-	// Meshes
+	/*********************************************/
+
+	/* Meshes ************************************/
 
 	this.snake = new Snake();
-	//this.scene.add(this.snake.mesh);
+	this.scene.add(this.snake.mesh);
 
 	this.bird = new Bird();
-	this.scene.add(this.bird.mesh);
+	//this.scene.add(this.bird.mesh);
 
-	// Clock
+	/*********************************************/
+
+	/* Clock *************************************/
 
 	this.clock = new THREE.Clock();
 }
