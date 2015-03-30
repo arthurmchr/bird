@@ -48,7 +48,7 @@ function Bird() {
 					},
 					speed: {
 						type: 'f',
-						value: 0.2
+						value: 0.025
 					},
 					gravity: {
 						type: 'v3',
@@ -122,20 +122,18 @@ function Bird() {
 					'vec3 outgoingLight = vec3(0.0);',
 					'vec4 diffuseColor = vec4(diffuse, opacity);',
 
-					'vec2 uvTimeShift = vUv + vec2(-1.0, -0.3) * time * speed;',
-					'vec4 texelColor = texture2D(map, vUv);',
+					'vec2 uvTimeShift = vUv * vec2(5.0, 1.0) + vec2(-1.0, -0.3) * time * speed;',
+					'vec4 texelColor = texture2D(map, uvTimeShift);',
 					'diffuseColor *= texelColor;',
 
 					'vec2 uvTimeShiftHair = vUv * vec2(20.0, 2.0) + vec2(-1.0, -0.3) * time * speed;',
-					'vec4 hairColor = texture2D(hairMap, vUv);',
+					'vec4 hairColor = texture2D(hairMap, uvTimeShiftHair);',
 
 					// Discard no hairs + above the max length
 
-					'if (hairColor.r <= 0.0 || hairColor.g < offset) {',
+					'if (hairColor.r == 0.0 || hairColor.g < offset) {',
 						'discard;',
 					'}',
-
-					//'diffuseColor *= vec4(texelColor.xyz, 1.1 - offset);',
 
 					THREE.ShaderChunk.specularmap_fragment,
 					THREE.ShaderChunk.lights_phong_fragment,
@@ -182,7 +180,7 @@ Bird.prototype.render = function(delta) {
 	var ln;
 
 	for (i = 0, ln = this.meshes.length; i < ln; i++) {
-		this.meshes[i].material.uniforms.time.value = delta;
+		this.meshes[i].material.uniforms.time.value += delta;
 	}
 };
 
