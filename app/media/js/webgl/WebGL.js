@@ -59,10 +59,10 @@ function WebGL(width, height) {
 	/* Meshes ************************************/
 
 	this.snake = new Snake();
-	this.scene.add(this.snake.mesh);
+	//this.scene.add(this.snake.mesh);
 
 	this.bird = new Bird();
-	//this.scene.add(this.bird.mesh);
+	this.scene.add(this.bird.mesh);
 
 	/*********************************************/
 

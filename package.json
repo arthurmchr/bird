@@ -16,7 +16,6 @@
 		"browserify": "^9.0.3",
 		"browserify-shim": "^3.8.3",
 		"del": "^1.1.1",
-		"glslify": "^1.6.0",
 		"gulp": "^3.8.11",
 		"gulp-autoprefixer": "^2.1.0",
 		"gulp-base64": "^0.1.2",
@@ -36,13 +35,10 @@
 	"browser": {},
 	"browserify": {
 		"transform": [
-			"browserify-shim",
-			"glslify"
+			"browserify-shim"
 		]
 	},
 	"browserify-shim": {
-		"three": "global:THREE",
-		"tweenmax": "global:TweenMax",
-		"preloadjs": "global:createjs"
+		"three": "global:THREE"
 	}
 }

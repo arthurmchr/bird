@@ -26,9 +26,11 @@ function Bird() {
 			uniforms: THREE.UniformsUtils.merge([
 
 				THREE.UniformsLib.common,
+				THREE.UniformsLib.bump,
+				THREE.UniformsLib.normalmap,
 				THREE.UniformsLib.lights,
 				{
-					colorMap: {
+					map: {
 						type: 't',
 						value: null
 					},
@@ -59,132 +61,86 @@ function Bird() {
 			/* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
 
 			vertexShader: [
+
 				'uniform float offset;',
-				'uniform float time;',
 				'uniform vec3 gravity;',
 
-				'varying vec2 vUv;',
 				'varying vec3 vNormal;',
 				'varying vec3 vViewPosition;',
 
+				THREE.ShaderChunk.map_pars_vertex,
 				THREE.ShaderChunk.lights_phong_pars_vertex,
 
 				'void main() {',
 
-					'vUv = uv;',
-					'vec3 aNormal = normal;',
+					THREE.ShaderChunk.map_vertex,
+					THREE.ShaderChunk.defaultnormal_vertex,
 
-					// Gravity
+					/*********************************************/
 
-					'vec3 displacement = gravity;',
+					/* Gravity ***********************************/
 
 					'float displacementFactor = pow(offset, 3.0);',
-
-					'aNormal.xyz += displacement * displacementFactor;',
-
-					// Move outwards depending on offset(layer) and normal + force + gravity
-
+					'vec3 aNormal = transformedNormal;',
+					'aNormal.xyz += gravity * displacementFactor;',
 					'vec3 animated = position + (normalize(aNormal) * offset * 60.0);',
 
-					'vNormal = normalize(normal * aNormal);',
+					'vNormal = normalize(transformedNormal * aNormal);',
+
+					THREE.ShaderChunk.default_vertex,
 
 					'gl_Position = projectionMatrix * modelViewMatrix * vec4(animated, 1.0);',
+
+					'vViewPosition = -mvPosition.xyz;',
 
 					THREE.ShaderChunk.lights_phong_vertex,
 
 				'}'
 			].join('\n'),
 			fragmentShader: [
+
 				'uniform vec3 diffuse;',
-				'uniform vec3 ambient;',
 				'uniform vec3 emissive;',
 				'uniform vec3 specular;',
 				'uniform float shininess;',
+				'uniform float opacity;',
 
-				'uniform sampler2D colorMap;',
 				'uniform sampler2D hairMap;',
 				'uniform float offset;',
 				'uniform float time;',
 				'uniform float speed;',
 
-				'varying vec2 vUv;',
-
+				THREE.ShaderChunk.common,
+				THREE.ShaderChunk.map_pars_fragment,
+				THREE.ShaderChunk.bumpmap_pars_fragment,
+				THREE.ShaderChunk.normalmap_pars_fragment,
 				THREE.ShaderChunk.specularmap_pars_fragment,
 				THREE.ShaderChunk.lights_phong_pars_fragment,
 
 				'void main() {',
 
-					'vec2 uvTimeShift = vUv + vec2(-1.0, -0.3) * time * speed;',
-					//'vec2 uvTimeShiftRepeat = vUv * vec2(20.0, 2.0) + vec2(-1.0, -0.3) * time * speed;',
+					'vec3 outgoingLight = vec3(0.0);',
+					'vec4 diffuseColor = vec4(diffuse, opacity);',
 
-					'vec4 col = texture2D(colorMap, vUv);',
-					'vec4 hairColor = texture2D(hairMap, vUv * vec2(20.0, 2.0));',
+					'vec2 uvTimeShift = vUv + vec2(-1.0, -0.3) * time * speed;',
+					'vec4 texelColor = texture2D(map, vUv);',
+					'diffuseColor *= texelColor;',
+
+					'vec2 uvTimeShiftHair = vUv * vec2(20.0, 2.0) + vec2(-1.0, -0.3) * time * speed;',
+					'vec4 hairColor = texture2D(hairMap, vUv);',
 
 					// Discard no hairs + above the max length
 
-					'if (hairColor.a <= 0.0 || hairColor.g < offset) {',
+					'if (hairColor.r <= 0.0 || hairColor.g < offset) {',
 						'discard;',
 					'}',
 
-					'gl_FragColor = vec4(col.xyz, 1.1 - offset);',
+					//'diffuseColor *= vec4(texelColor.xyz, 1.1 - offset);',
 
 					THREE.ShaderChunk.specularmap_fragment,
+					THREE.ShaderChunk.lights_phong_fragment,
 
-					//THREE.ShaderChunk.lights_phong_fragment,
-
-					'vec3 normal = normalize( vNormal );',
-					'vec3 viewPosition = normalize( vViewPosition );',
-					'#if MAX_DIR_LIGHTS > 0',
-
-						'vec3 dirDiffuse = vec3( 0.0 );',
-						'vec3 dirSpecular = vec3( 0.0 );',
-
-						'for( int i = 0; i < MAX_DIR_LIGHTS; i ++ ) {',
-
-							'vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ i ], 0.0 );',
-							'vec3 dirVector = normalize( lDirection.xyz );',
-
-							'float dotProduct = dot( normal, dirVector );',
-
-							'#ifdef WRAP_AROUND',
-
-								'float dirDiffuseWeightFull = max( dotProduct, 0.0 );',
-								'float dirDiffuseWeightHalf = max( 0.5 * dotProduct + 0.5, 0.0 );',
-
-								'vec3 dirDiffuseWeight = mix( vec3( dirDiffuseWeightFull ), vec3( dirDiffuseWeightHalf ), wrapRGB );',
-
-							'#else',
-
-								'float dirDiffuseWeight = max( dotProduct, 0.0 );',
-
-							'#endif',
-
-							'dirDiffuse += diffuse * directionalLightColor[ i ] * dirDiffuseWeight;',
-
-							'vec3 dirHalfVector = normalize( dirVector + viewPosition );',
-							'float dirDotNormalHalf = max( dot( normal, dirHalfVector ), 0.0 );',
-							'float dirSpecularWeight = specularStrength * max( pow( dirDotNormalHalf, shininess ), 0.0 );',
-
-							'float specularNormalization = ( shininess + 2.0 ) / 8.0;',
-
-							'vec3 schlick = specular + vec3( 1.0 - specular ) * pow( max( 1.0 - dot( dirVector, dirHalfVector ), 0.0 ), 5.0 );',
-							'dirSpecular += schlick * directionalLightColor[ i ] * dirSpecularWeight * dirDiffuseWeight * specularNormalization;',
-
-						'}',
-
-					'#endif',
-
-					'vec3 totalDiffuse = vec3( 0.0 );',
-					'vec3 totalSpecular = vec3( 0.0 );',
-
-					'#if MAX_DIR_LIGHTS > 0',
-
-						'totalDiffuse += dirDiffuse;',
-						'totalSpecular += dirSpecular;',
-
-					'#endif',
-
-					'gl_FragColor.xyz = gl_FragColor.xyz * ( emissive + totalDiffuse + ambientLightColor * ambient ) + totalSpecular;',
+					'gl_FragColor = vec4(outgoingLight, diffuseColor.a);',
 
 				'}'
 			].join('\n'),
@@ -192,11 +148,11 @@ function Bird() {
 			/* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 			/* jshint camelcase:true */
 
-			transparent: true,
 			lights: true
 		});
 
-		material.uniforms.colorMap.value = mapTexture;
+		material.map = true;
+		material.uniforms.map.value = mapTexture;
 		material.uniforms.hairMap.value = furTexure;
 
 		var newMesh = new THREE.Mesh(torusKnotGeo, material);
@@ -212,7 +168,7 @@ Bird.prototype.generateTexture = function() {
 	var ctx = canvas.getContext('2d');
 
 	for (var i = 0; i < 10000; i++) {
-		ctx.fillStyle = 'rgb(255, ' + Math.floor(Math.random() * 255) + ', ' + Math.floor(Math.random() * 255) + ')';
+		ctx.fillStyle = 'rgb(255, ' + Math.floor(Math.random() * 255) + ', 0)';
 
 		ctx.fillRect((Math.random() * canvas.width), (Math.random() * canvas.height), 2, 2);
 	}

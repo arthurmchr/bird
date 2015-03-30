@@ -15,6 +15,10 @@ function Snake() {
 			THREE.UniformsLib.normalmap,
 			THREE.UniformsLib.lights,
 			{
+				map: {
+					type: 't',
+					value: null
+				},
 				time: {
 					type: 'f',
 					value: 0.0
@@ -31,20 +35,24 @@ function Snake() {
 
 		vertexShader: [
 
-			'varying vec2 vUv;',
 			'varying vec3 vNormal;',
 			'varying vec3 vViewPosition;',
 
+			THREE.ShaderChunk.map_pars_vertex,
 			THREE.ShaderChunk.lights_phong_pars_vertex,
 
 			'void main() {',
 
-				'vUv = uv;',
-				'vNormal = normal;',
+				THREE.ShaderChunk.map_vertex,
+				THREE.ShaderChunk.defaultnormal_vertex,
+
+				'vNormal = normalize(transformedNormal);',
+
+				THREE.ShaderChunk.default_vertex,
+
+				'vViewPosition = -mvPosition.xyz;',
 
 				THREE.ShaderChunk.lights_phong_vertex,
-
-				'gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
 
 			'}'
 
@@ -53,14 +61,15 @@ function Snake() {
 		fragmentShader: [
 
 			'uniform vec3 diffuse;',
-			'uniform vec3 ambient;',
 			'uniform vec3 emissive;',
 			'uniform vec3 specular;',
 			'uniform float shininess;',
+			'uniform float opacity;',
 
 			'uniform float time;',
 			'uniform float speed;',
 
+			THREE.ShaderChunk.common,
 			THREE.ShaderChunk.map_pars_fragment,
 			THREE.ShaderChunk.bumpmap_pars_fragment,
 			THREE.ShaderChunk.normalmap_pars_fragment,
@@ -69,13 +78,17 @@ function Snake() {
 
 			'void main() {',
 
+				'vec3 outgoingLight = vec3(0.0);',
+				'vec4 diffuseColor = vec4(diffuse, opacity);',
+
 				'vec2 uvTimeShift = vUv * vec2(30.0, 6.0) + vec2(-1.0, -0.3) * time * speed;',
 				'vec4 texelColor = texture2D(map, uvTimeShift);',
-				'gl_FragColor = texelColor;',
+				'diffuseColor *= texelColor;',
 
 				THREE.ShaderChunk.specularmap_fragment,
-
 				THREE.ShaderChunk.lights_phong_fragment,
+
+				'gl_FragColor = vec4(outgoingLight, diffuseColor.a);',
 
 			'}'
 
