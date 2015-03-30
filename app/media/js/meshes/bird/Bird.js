@@ -6,7 +6,9 @@ function Bird() {
 	this.mesh = new THREE.Object3D();
 	this.meshes = [];
 
-	var torusKnotGeo = new THREE.TorusKnotGeometry(160, 80, 160, 10);
+	// radius, tube, radialSeg, tubularSeg
+
+	var torusKnotGeo = new THREE.TorusKnotGeometry(160, 80, 40, 8);
 
 	var mapTexture = THREE.ImageUtils.loadTexture('/media/img/11133-v4.jpg');
 	mapTexture.wrapS = mapTexture.wrapT = THREE.RepeatWrapping;

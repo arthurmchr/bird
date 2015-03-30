@@ -8,6 +8,7 @@ function WebGL(width, height) {
 	this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
 
 	this.camera.position.z = 500;
+	this.scene.add(this.camera);
 
 	this.renderer = new THREE.WebGLRenderer({
 		antialias: true
