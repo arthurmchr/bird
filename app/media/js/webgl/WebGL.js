@@ -59,10 +59,10 @@ function WebGL(width, height) {
 	/* Meshes ************************************/
 
 	this.snake = new Snake();
-	//this.scene.add(this.snake.mesh);
+	this.scene.add(this.snake.mesh);
 
 	this.bird = new Bird();
-	this.scene.add(this.bird.mesh);
+	//this.scene.add(this.bird.mesh);
 
 	/*********************************************/
 
@@ -78,15 +78,15 @@ WebGL.prototype.resize = function(width, height) {
 	this.renderer.setSize(width, height);
 };
 
-WebGL.prototype.mouseMove = function(x) {
-	this.mouseScreenX = (x - window.innerWidth / 2) * 10;
+WebGL.prototype.mouseMove = function() {
+	//this.mouseScreenX = (x - window.innerWidth / 2) * 10;
 };
 
 WebGL.prototype.render = function() {
 	this.renderer.render(this.scene, this.camera);
 	var delta = this.clock.getDelta();
 
-	this.camera.position.x = this.mouseScreenX * 0.025;
+	//this.camera.position.x = this.mouseScreenX * 0.025;
 	this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 
 	this.snake.render(delta);

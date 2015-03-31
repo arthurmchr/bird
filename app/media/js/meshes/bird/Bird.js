@@ -10,7 +10,7 @@ function Bird() {
 
 	var torusKnotGeo = new THREE.TorusKnotGeometry(160, 80, 40, 8);
 
-	var mapTexture = THREE.ImageUtils.loadTexture('/media/img/11133-v4.jpg');
+	var mapTexture = THREE.ImageUtils.loadTexture('/media/img/bird-map.jpg');
 	mapTexture.wrapS = mapTexture.wrapT = THREE.RepeatWrapping;
 
 	var furTexure = new THREE.Texture(this.generateTexture());
