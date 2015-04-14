@@ -7,7 +7,6 @@ function Bird() {
 	this.meshes = [];
 
 	// radius, tube, radialSeg, tubularSeg
-
 	var torusKnotGeo = new THREE.TorusKnotGeometry(160, 80, 40, 8);
 
 	var mapTexture = THREE.ImageUtils.loadTexture('/media/img/bird-map.jpg');
@@ -80,7 +79,7 @@ function Bird() {
 
 					/* Gravity ***********************************/
 
-					'float displacementFactor = pow(offset, 3.0);',
+					'float displacementFactor = pow(offset, 1.0);',
 					'vec3 aNormal = transformedNormal;',
 					'aNormal.xyz += gravity * displacementFactor;',
 					'vec3 animated = position + (normalize(aNormal) * offset * 60.0);',
@@ -165,7 +164,7 @@ Bird.prototype.generateTexture = function() {
 
 	var ctx = canvas.getContext('2d');
 
-	for (var i = 0; i < 10000; i++) {
+	for (var i = 0; i < 8000; i++) {
 		ctx.fillStyle = 'rgb(255, ' + Math.floor(Math.random() * 255) + ', 0)';
 
 		ctx.fillRect((Math.random() * canvas.width), (Math.random() * canvas.height), 2, 2);

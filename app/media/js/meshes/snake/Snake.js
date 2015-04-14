@@ -11,8 +11,6 @@ function Snake() {
 		uniforms: THREE.UniformsUtils.merge([
 
 			THREE.UniformsLib.common,
-			THREE.UniformsLib.bump,
-			THREE.UniformsLib.normalmap,
 			THREE.UniformsLib.lights,
 			{
 				map: {
@@ -71,9 +69,6 @@ function Snake() {
 
 			THREE.ShaderChunk.common,
 			THREE.ShaderChunk.map_pars_fragment,
-			THREE.ShaderChunk.bumpmap_pars_fragment,
-			THREE.ShaderChunk.normalmap_pars_fragment,
-			THREE.ShaderChunk.specularmap_pars_fragment,
 			THREE.ShaderChunk.lights_phong_pars_fragment,
 
 			'void main() {',
@@ -102,10 +97,6 @@ function Snake() {
 
 	torusKnotShader.map = true;
 	torusKnotShader.uniforms.map.value = mapTexture;
-
-	//torusKnotShader.uniforms.specularMap = ;
-	//torusKnotShader.uniforms.bumpMap = ;
-	//torusKnotShader.uniforms.normalMap = ;
 
 	this.mesh = new THREE.Mesh(torusKnotGeo, torusKnotShader);
 }
