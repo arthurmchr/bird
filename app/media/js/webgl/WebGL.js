@@ -1,5 +1,5 @@
 var THREE = require('three');
-var Snake = require('../meshes/snake');
+//var Snake = require('../meshes/snake');
 var Bird = require('../meshes/bird');
 //var dat = require('dat-gui');
 
@@ -58,11 +58,11 @@ function WebGL(width, height) {
 
 	/* Meshes ************************************/
 
-	this.snake = new Snake();
+	//this.snake = new Snake();
 	//this.scene.add(this.snake.mesh);
 
 	this.bird = new Bird();
-	this.scene.add(this.bird.mesh);
+	//this.scene.add(this.bird.mesh);
 
 	/*********************************************/
 
@@ -89,7 +89,7 @@ WebGL.prototype.render = function() {
 	//this.camera.position.x = this.mouseScreenX * 0.025;
 	this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-	this.snake.render(delta);
+	//this.snake.render(delta);
 	this.bird.render(delta);
 };
 

@@ -19,18 +19,28 @@ function AppManager() {
 		paused: true
 	});
 
+	tl.to('.tile__bar', 0.8, {
+		width: '100%'
+	});
+	tl.set('.title span', {
+		y: 140
+	});
+	tl.to('.title span', 0.8, {
+		opacity: 1,
+		y: 0
+	});
+	tl.from('.border--l', 0.4, {
+		height: 0
+	});
 	tl.from('.border--t', 0.4, {
 		width: 0
 	});
 	tl.from('.border--r', 0.4, {
 		height: 0
-	});
+	}, '-=0.8');
 	tl.from('.border--b', 0.4, {
 		width: 0
-	});
-	tl.from('.border--l', 0.4, {
-		height: 0
-	});
+	}, '-=0.4');
 
 	tl.restart();
 }
