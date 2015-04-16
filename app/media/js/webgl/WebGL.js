@@ -1,11 +1,11 @@
 var THREE = require('three');
 //var Snake = require('../meshes/snake');
 var Bird = require('../meshes/bird');
-//var dat = require('dat-gui');
 
 function WebGL(width, height) {
 	this.scene = new THREE.Scene();
 	this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+	this.currentX = 0;
 
 	this.camera.position.z = 500;
 	this.scene.add(this.camera);
@@ -15,33 +15,6 @@ function WebGL(width, height) {
 	});
 	this.renderer.setSize(width, height);
 	this.renderer.setClearColor(0x000000);
-
-	// DAT GUI
-
-	// var GUIParams = function() {
-	// 	this.radius = 160;
-	// 	this.tube = 80;
-	// 	this.radialSegments = 160;
-	// 	this.tubularSegments = 10;
-	// 	this.redrawTorus = function() {
-	// 		this.scene.remove(this.torusKnot);
-
-	// 		torusKnotGeo = new THREE.TorusKnotGeometry(guiParams.radius, guiParams.tube, guiParams.radialSegments, guiParams.tubularSegments);
-	// 		this.torusKnot = new THREE.Mesh(torusKnotGeo, torusKnotShader);
-	// 		this.scene.add(this.torusKnot);
-	// 	};
-	// };
-
-	// var gui = new dat.GUI();
-	// var guiParams = new GUIParams();
-	// guiParams.redrawTorus = guiParams.redrawTorus.bind(this);
-
-	// gui.add(guiParams, 'radius', 1).onChange(guiParams.redrawTorus);
-	// gui.add(guiParams, 'tube', 1).onChange(guiParams.redrawTorus);
-	// gui.add(guiParams, 'radialSegments', 3).onChange(guiParams.redrawTorus);
-	// gui.add(guiParams, 'tubularSegments', 2).onChange(guiParams.redrawTorus);
-
-	// gui.close();
 
 	/*********************************************/
 
@@ -62,7 +35,7 @@ function WebGL(width, height) {
 	//this.scene.add(this.snake.mesh);
 
 	this.bird = new Bird();
-	//this.scene.add(this.bird.mesh);
+	this.scene.add(this.bird.mesh);
 
 	/*********************************************/
 
@@ -78,15 +51,15 @@ WebGL.prototype.resize = function(width, height) {
 	this.renderer.setSize(width, height);
 };
 
-WebGL.prototype.mouseMove = function() {
-	//this.mouseScreenX = (x - window.innerWidth / 2) * 10;
+WebGL.prototype.mouseMove = function(x) {
+	this.mouseScreenX = ((x - window.innerWidth / 2) * 10) * 0.01;
 };
 
 WebGL.prototype.render = function() {
 	this.renderer.render(this.scene, this.camera);
 	var delta = this.clock.getDelta();
 
-	//this.camera.position.x = this.mouseScreenX * 0.025;
+	this.camera.position.x += (this.mouseScreenX - this.camera.position.x) * 0.4;
 	this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 
 	//this.snake.render(delta);

@@ -4,6 +4,7 @@ function Bird() {
 
 	this.gravity = new THREE.Vector3(0, -0.75, 0);
 	this.mesh = new THREE.Object3D();
+	this.mesh.position.y = 20;
 	this.meshes = [];
 
 	// radius, tube, radialSeg, tubularSeg
@@ -19,7 +20,7 @@ function Bird() {
 	var i;
 	var shells;
 
-	for (i = 0, shells = 30; i < shells; i++) {
+	for (i = 0, shells = 18; i < shells; i++) {
 
 		var material = new THREE.ShaderMaterial({
 			uniforms: THREE.UniformsUtils.merge([
@@ -111,9 +112,6 @@ function Bird() {
 
 				THREE.ShaderChunk.common,
 				THREE.ShaderChunk.map_pars_fragment,
-				THREE.ShaderChunk.bumpmap_pars_fragment,
-				THREE.ShaderChunk.normalmap_pars_fragment,
-				THREE.ShaderChunk.specularmap_pars_fragment,
 				THREE.ShaderChunk.lights_phong_pars_fragment,
 
 				'void main() {',
@@ -145,7 +143,8 @@ function Bird() {
 			/* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 			/* jshint camelcase:true */
 
-			lights: true
+			lights: true,
+			transparent: true
 		});
 
 		material.map = true;
@@ -164,10 +163,10 @@ Bird.prototype.generateTexture = function() {
 
 	var ctx = canvas.getContext('2d');
 
-	for (var i = 0; i < 8000; i++) {
+	for (var i = 0; i < 10000; i++) {
 		ctx.fillStyle = 'rgb(255, ' + Math.floor(Math.random() * 255) + ', 0)';
 
-		ctx.fillRect((Math.random() * canvas.width), (Math.random() * canvas.height), 2, 2);
+		ctx.fillRect((Math.random() * canvas.width), (Math.random() * canvas.height), 4, 4);
 	}
 
 	return canvas;
