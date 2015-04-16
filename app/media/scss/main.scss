@@ -9,6 +9,30 @@ canvas {
 	//display: none;
 }
 
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.footer {
+	width: 100%;
+	color: #707070;
+	position: absolute;
+	bottom: 10px;
+	font-size: 11px;
+	font-family: Arial, sans-serif;
+
+	div:nth-of-type(1) {
+		padding-left: 10px;
+		float: left;
+	}
+
+	div:nth-of-type(2) {
+		padding-right: 10px;
+		float: right;
+	}
+}
+
 .intro {
 	width: 500px;
 	height: 260px;
@@ -40,8 +64,8 @@ canvas {
 	line-height: 260px;
 	font-size: 50px;
 	font-weight: normal;
-	font-family: Georgia, serif;
 	font-style: italic;
+	font-family: Georgia, serif;
 	text-transform: uppercase;
 	letter-spacing: 6px;
 	position: relative;
