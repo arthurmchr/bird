@@ -14,7 +14,7 @@ function WebGL(width, height) {
 		antialias: true
 	});
 	this.renderer.setSize(width, height);
-	this.renderer.setClearColor(0x000000);
+	this.renderer.setClearColor(0xebebeb);
 
 	/*********************************************/
 

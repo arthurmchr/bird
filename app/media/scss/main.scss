@@ -16,7 +16,7 @@ a {
 
 .footer {
 	width: 100%;
-	color: #707070;
+	color: #959595;
 	position: absolute;
 	bottom: 10px;
 	font-size: 11px;
@@ -118,4 +118,13 @@ a {
 		bottom: -10px;
 		left: -10px;
 	}
+}
+
+.vignettage {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	box-shadow: inset 0px 0px 180px 20px rgba(0, 0, 0, 1);
 }
