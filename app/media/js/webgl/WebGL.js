@@ -59,7 +59,7 @@ WebGL.prototype.render = function() {
 	this.renderer.render(this.scene, this.camera);
 	var delta = this.clock.getDelta();
 
-	this.camera.position.x += (this.mouseScreenX - this.camera.position.x) * 0.4;
+	this.camera.position.x += (this.mouseScreenX - this.camera.position.x) * 0.1;
 	this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 
 	//this.snake.render(delta);
