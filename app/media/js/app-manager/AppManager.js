@@ -2,6 +2,7 @@ var raf = require('raf');
 var WebGL = require('../webgl');
 var TimelineMax = require('timelinemax');
 var TweenMax = require('tweenmax');
+var createjs = require('preloadjs');
 
 function AppManager() {
 	this.animate = this.animate.bind(this);
@@ -14,24 +15,14 @@ function AppManager() {
 	window.addEventListener('resize', this.resizeEvent);
 	window.addEventListener('mousemove', this.mouseMoveEvent);
 
-	this.animate();
+	this.tl = new TimelineMax({
+		paused: true
+	});
 
-	var tl = new TimelineMax();
-
-	tl.to('.tile__bar', 0.8, {
-		width: '100%',
-		onComplete: function() {
-			var current = this.target[0];
-
-			current.style.right = 0;
-			TweenMax.to(current, 0.3, {
-				width: 0,
-				delay: 0.3
-			});
-		}
-	})
-	.from('.intro__container__group__bck', 0.6, {
+	this.tl.fromTo('.intro__container__group__bck', 0.6, {
 		scale: window.innerHeight / document.getElementsByClassName('intro__container__group__bck')[0].offsetHeight
+	}, {
+		scale: 1
 	})
 	.to('.title span', 0.5, {
 		opacity: 1,
@@ -65,7 +56,42 @@ function AppManager() {
 	.to('.border--b', 0.3, {
 		width: 0
 	}, '-=0.4');
+
+	this.loadingFile();
+
+	/*********************************************/
+
+	/* Start loop ********************************/
+
+	this.animate();
 }
+
+AppManager.prototype.loadingFile = function() {
+	var _this = this;
+
+	var queue = new createjs.LoadQueue();
+
+	queue.on('progress', function(event) {
+		TweenMax.killTweensOf('.tile__bar');
+		TweenMax.to('.tile__bar', 0.8, {
+			width: (event.loaded * 100) + '%'
+		});
+	});
+
+	queue.on('complete', function() {
+		setTimeout(function() {
+			document.getElementsByClassName('tile__bar')[0].style.right = 0;
+			TweenMax.to('.tile__bar', 0.8, {
+				width: 0,
+				onComplete: function() {
+					_this.tl.play();
+				}
+			});
+		}, 800);
+	});
+
+	queue.loadFile('/media/img/bird-map.jpg');
+};
 
 AppManager.prototype.resizeEvent = function() {
 	this.webGL.resize(window.innerWidth, window.innerHeight);
