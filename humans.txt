@@ -1,0 +1,16 @@
+# humanstxt.org/
+# The humans responsible & technology colophon
+
+# TEAM
+
+	Arthur Muchir
+		Twitter : @arthurmuchir
+		Site : http://www.arthur.muchir.fr
+		Mail : arthur.muchir@gmail.com
+		Location : Paris
+
+# TECHNOLOGY COLOPHON
+
+	HTML5, CSS3, JavaScript
+	SASS, BEM, autoprefixer, Normalize.css
+	Modernizr, Webpack, Gulp, jsHint, jsCs
