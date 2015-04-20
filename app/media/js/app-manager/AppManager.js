@@ -74,20 +74,23 @@ AppManager.prototype.loadingFile = function() {
 	queue.on('progress', function(event) {
 		TweenMax.killTweensOf('.tile__bar');
 		TweenMax.to('.tile__bar', 0.8, {
-			width: (event.loaded * 100) + '%'
+			width: (event.loaded * 75) + '%'
 		});
 	});
 
 	queue.on('complete', function() {
-		setTimeout(function() {
-			document.getElementsByClassName('tile__bar')[0].style.right = 0;
-			TweenMax.to('.tile__bar', 0.8, {
-				width: 0,
-				onComplete: function() {
-					_this.tl.play();
-				}
-			});
-		}, 800);
+		_this.tl.play();
+
+		TweenMax.killTweensOf('.tile__bar');
+		TweenMax.to('.tile__bar', 1, {
+			width: 100 + '%',
+			onComplete: function() {
+				document.getElementsByClassName('tile__bar')[0].style.right = 0;
+				TweenMax.to('.tile__bar', 0.8, {
+					width: 0
+				});
+			}
+		});
 	});
 
 	queue.loadFile('/media/img/bird-map.jpg');
