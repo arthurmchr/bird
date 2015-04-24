@@ -26,8 +26,6 @@ function Bird() {
 			uniforms: THREE.UniformsUtils.merge([
 
 				THREE.UniformsLib.common,
-				THREE.UniformsLib.bump,
-				THREE.UniformsLib.normalmap,
 				THREE.UniformsLib.lights,
 				{
 					map: {
